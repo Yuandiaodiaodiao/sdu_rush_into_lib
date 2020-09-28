@@ -41,7 +41,7 @@ from main import getCanUseTime
 class BookListHandler(tornado.web.RequestHandler):
     def get(self):
         js=getCanUseTime()
-        print(js)
+        # print(js)
         self.write(json.dumps(js))
 from main import getLT,loginCas
 class LTHandler(tornado.web.RequestHandler):
