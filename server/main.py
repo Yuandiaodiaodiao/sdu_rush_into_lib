@@ -127,8 +127,15 @@ def getOrderInfo(session):
         "Referer":"http://seat.lib.sdu.edu.cn/book/notice/act_id/6794/type/4/lib/17"
     }
     r=s.get(url=url,headers=headers)
-    print(r.text)
+    # print(r.text)
     return r.text
+def getAllBook(session):
+    url="http://seat.lib.sdu.edu.cn/user/index/book"
+    headers={
+        "Referer":"http://seat.lib.sdu.edu.cn/home/web/index"
+    }
+    r=s.get(url=url,headers=headers)
+    print(r.text)
 
 if __name__ == '__main__':
     # res = login(123, "***")

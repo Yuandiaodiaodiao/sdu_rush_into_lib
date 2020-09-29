@@ -30,7 +30,7 @@ class ApiHandler(tornado.web.RequestHandler):
             self.write(res)
         elif js.get("op")=='list':
             res=getOrderInfo(session)
-            self.write(res)
+            self.write("")
         elif js.get("op")=='quit':
             res=quit(session,js.get("link"))
             self.write(res)
