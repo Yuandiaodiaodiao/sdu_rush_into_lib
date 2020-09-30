@@ -64,14 +64,27 @@
             const passwd = ref("")
             const islogin = ref(false)
             const login = async () => {
-                const lt = (await axios.get("/api/lt")).data
-                const rsa = strEnc(userid.value + passwd.value + lt, "1", "2", "3")
-                const res = await axios.post("/api/lt",
-                    {rsa, lt, ul: userid.value.length, pl: passwd.value.length})
-                console.log("存储" + userid.value)
-                localStorage.setItem('userid', userid.value)
-                localStorage.setItem('passwd', passwd.value)
-                islogin.value = true
+                try{
+                    const lt = (await axios.get("/api/lt")).data
+                    const rsa = strEnc(userid.value + passwd.value + lt, "1", "2", "3")
+                    const res = await axios.post("/api/lt",
+                        {rsa, lt, ul: userid.value.length, pl: passwd.value.length})
+                    console.log(res.data)
+                    if(res.data==="success"){
+
+                    }else{
+                        alert("登录失败")
+                        return
+                    }
+                    console.log("存储" + userid.value)
+                    localStorage.setItem('userid', userid.value)
+                    localStorage.setItem('passwd', passwd.value)
+                    islogin.value = true
+                }catch(e){
+                    alert("登录失败")
+                    
+                }
+
             }
             onBeforeMount(async () => {
                 const res = await axios.get("/api/list")
