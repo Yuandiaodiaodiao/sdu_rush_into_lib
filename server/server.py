@@ -6,33 +6,21 @@ import requests
 
 staticpath = os.path.join("dist", 'static')
 htmlpath = os.path.join("dist", 'index.html')
-sessions = {}
+from SduCasLogin import sessions, getSessions, LTHandler,BaseHandle
 
 
-def getToken(self):
-    return self.xsrf_token.split(b"|")[-1]
-
-def newSession(self):
-    token = getToken(self)
-    sessions[token]=requests.session()
-    s = sessions.get(token)
-    return s
-def getSessions(self):
-    token = getToken(self)
-    sessions.setdefault(token, requests.session())
-    s = sessions.get(token)
-    return s
 
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
+        self.clear_cookie("token")
         self.render(htmlpath)
 
 
 from main import rushInto, getOrderInfo, quit
 
 
-class ApiHandler(tornado.web.RequestHandler):
+class ApiHandler(BaseHandle):
     def post(self):
         js = json.loads(self.request.body)
         session = getSessions(self)
@@ -59,36 +47,14 @@ class BookListHandler(tornado.web.RequestHandler):
         self.write(json.dumps(js))
 
 
-from main import getLT, loginCas
-
-
-class LTHandler(tornado.web.RequestHandler):
-    loginHtml = {}
-
-    def get(self):
-        print("getLt")
-        session = newSession(self)
-        lt, html = getLT(session)
-        self.loginHtml[getToken(self)] = html
-        self.write(lt)
-
-    def post(self):
-        print("postLt")
-        session = getSessions(self)
-
-        js = json.loads(self.request.body)
-        # print(js)
-        res = loginCas(session, js, self.loginHtml.get(getToken(self)))
-        if "auto_user_check" in res.url:
-            self.write("success")
-        else:
-            self.write("false")
-
-
-
 setting = dict(
     static_path=staticpath,
+    cookie_secret='sducasssssssssss',
+    login_url="/",
 )
+def clean():
+    for key in sessions.items():
+        del sessions[key]
 if __name__ == "__main__":
     application = tornado.web.Application([
         (r"/", MainHandler),
@@ -97,4 +63,5 @@ if __name__ == "__main__":
         (r"/api/lt", LTHandler)
     ], **setting)
     application.listen(10279)
+    tornado.ioloop.PeriodicCallback(clean, 1000*60*60).start()
     tornado.ioloop.IOLoop.current().start()

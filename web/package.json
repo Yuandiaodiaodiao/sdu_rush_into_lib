@@ -1,6 +1,6 @@
 {
   "name": "sdu_rush_into_lib",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
     "dev": "vite",
     "build": "vite build"
@@ -8,10 +8,10 @@
   "dependencies": {
     "ant-design-vue": "^2.0.0-beta.10",
     "axios": "^0.20.0",
-    "vue": "^3.0.0-rc.1"
+    "vue": "^3.0.0"
   },
   "devDependencies": {
     "vite": "^1.0.0-rc.1",
-    "@vue/compiler-sfc": "^3.0.0-rc.1"
+    "@vue/compiler-sfc": "^3.0.0"
   }
 }

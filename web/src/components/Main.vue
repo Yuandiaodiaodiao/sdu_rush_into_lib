@@ -10,31 +10,12 @@
         margin: auto 5px;
     }
 
-    .inputBox {
 
-        display: flex;
-        flex-direction: column;
-        margin: 20px;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .inputBox > * {
-        width: 70vw;
-        margin: 5px;
-    }
 </style>
 
 <template>
-    <div v-if="!islogin" class="inputBox">
-        <input placeholder="学号" v-model="userid"/>
-        <input placeholder="密码" type="password" v-model="passwd"/>
-        <a-button @click="login()">记住并登录</a-button>
-    </div>
-    <div class="inputBox" v-else>
-        <a-button @click="logout()">退出登录</a-button>
-    </div>
-    <div class="timebox" v-for="(item,index) in timeInfo" :key="index">
+    <SduCasLogin v-model:islogin="islogin"></SduCasLogin>
+    <div v-show="islogin" class="timebox" v-for="(item,index) in timeInfo" :key="index">
         <div>{{item["timeStart"]}}</div>
         <div>~</div>
         <div>{{item["timeEnd"]}}</div>
@@ -50,75 +31,42 @@
 </template>
 
 <script>
-    import {ref, reactive, onBeforeMount, getCurrentInstance} from "vue"
+    import {ref, reactive, onBeforeMount, getCurrentInstance, watchEffect, inject} from "vue"
     import axios from "axios"
-    import {strEnc} from "../util/des.js"
-
+    import SduCasLogin from "./SduCasLogin.vue";
     export default {
         name: "Main",
-
+        components:{
+            SduCasLogin
+        },
         setup() {
             const {ctx} = getCurrentInstance()
             const timeInfo = ref([])
-            const userid = ref("")
-            const passwd = ref("")
-            const islogin = ref(false)
-            const login = async () => {
-                try{
-                    const lt = (await axios.get("/api/lt")).data
-                    const rsa = strEnc(userid.value + passwd.value + lt, "1", "2", "3")
-                    const res = await axios.post("/api/lt",
-                        {rsa, lt, ul: userid.value.length, pl: passwd.value.length})
-                    console.log(res.data)
-                    if(res.data==="success"){
+            const islogin=ref(false)
+            const message=inject("message")
 
-                    }else{
-                        alert("登录失败")
-                        return
-                    }
-                    console.log("存储" + userid.value)
-                    localStorage.setItem('userid', userid.value)
-                    localStorage.setItem('passwd', passwd.value)
-                    islogin.value = true
-                }catch(e){
-                    alert("登录失败")
-
-                }
-
-            }
+            watchEffect(()=>{
+                console.log("Main.vue: "+islogin.value)
+            })
             onBeforeMount(async () => {
                 const res = await axios.get("/api/list")
                 timeInfo.value = res.data
 
-                const useridt = localStorage.getItem('userid')
-                if (useridt && useridt.length > 5) {
-                    islogin.value = true
-                    userid.value = localStorage.getItem('userid')
-                    passwd.value = localStorage.getItem('passwd')
-                    await login()
-                }
             })
 
 
-            const logout = () => {
-                localStorage.removeItem('userid')
-                localStorage.removeItem('passwd')
-                islogin.value = false
-
-            }
             const rush = async (item) => {
                 const res = await axios.post("api", {op: "rush", ...item})
                 console.log(res.data)
 
                 if(res.data.status===1){
-                    alert("预约成功")
+                    message.success("预约成功")
                 }else{
                     if(res.data.msg==="用户未登录"){
-                        alert("正在重新登录")
-                        await login()
-                        await rush(item)
+                        message.warning("用户未登录")
+                        islogin.value=false
                     }else{
-                        alert("申请失败")
+                        message.error(`申请失败 ${res.data.msg}`)
                     }
                 }
             }
@@ -126,9 +74,9 @@
                 const res = await axios.post("api", {op: "quit", ...item})
                 console.log(res.data)
                 if(res.data.status===1){
-                    alert("爬爬爬我最会爬了")
+                    message.success("爬爬爬我最会爬了")
                 }else{
-                    alert("爬都能爬歪来👎")
+                    message.error("爬都能爬歪来👎")
                 }
             }
             const getOrder=async ()=>{
@@ -137,7 +85,7 @@
 
             }
             return {
-                timeInfo, rush, login, islogin, userid, passwd, logout,getOrder,quit
+                timeInfo, rush, getOrder,quit,islogin
             }
         }
     }

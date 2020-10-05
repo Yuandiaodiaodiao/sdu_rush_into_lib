@@ -867,4 +867,4 @@ function generateKeys(keyByte){
  return keys;
 }
 
-export {strEnc}
+export {strEnc,strDec}
